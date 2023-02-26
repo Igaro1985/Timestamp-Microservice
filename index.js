@@ -2,12 +2,12 @@
 // where your node app starts
 
 // init project
-const express = require('express');
-const app = express();
-require("dotenv").config()
+var express = require('express');
+var app = express();
+
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
-const cors = require('cors');
+var cors = require('cors');
 app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
@@ -20,24 +20,35 @@ app.get("/", function (req, res) {
 
 
 // your first API endpoint... 
-
-app.get("/api/", function (req, res) {
-  let currentDate = new Date()
-  res.json({"unix": currentDate.getTime(), "utc": `${currentDate}`});
+app.get("/api/hello", function (req, res) {
+  res.json({greeting: 'hello API'});
 });
 
-// console.log(date)
 
-app.get("/api/:date?", function (req, res) {
-  let calcDate = isNaN(req.params.date) ? req.params.date : parseInt(req.params.date)
-  console.log(calcDate)
-  let currentDate = new Date(calcDate)
-  let errorResponse = {"error": `${currentDate}`}
-  let validResponse = {"unix": currentDate.getTime(), "utc": `${currentDate.toUTCString()}`}
-  console.log(currentDate)
-  currentDate == "Invalid Date" ? res.json(errorResponse) : res.json(validResponse); 
-});
+
 // listen for requests :)
-const listener = app.listen(process.env.PORT, function () {
+var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
-}); 
+});
+
+
+app.get('/api/:date', (req, res) => {
+
+
+    if (Date.parse(req.params.date)) {
+        console.log('case: date string')
+        res.json({ unix: Date.parse(req.params.date), utc: new Date(req.params.date).toUTCString() });
+    }
+    else if (Number.parseInt(req.params.date)) {
+        console.log('case: unix to date');
+        res.json({ unix: Number.parseInt(req.params.date), utc: new Date(Number.parseInt(req.params.date)).toUTCString() });
+    }
+    else {
+        res.json({ error: 'Invalid Date' });
+    }
+
+});
+
+app.get('/api', (req, res) => {
+    res.json({ unix: Date.now(), utc: new Date().toUTCString() });
+});
